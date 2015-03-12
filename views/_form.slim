@@ -1,6 +1,9 @@
 form action='/posts' method='POST'
   h2 Title
-  input type='text' name='title' size='120'
+  input type='text' name='title' size='120' required='true'
+
+  h2 Permalink
+  input type='text' name='permalink' size='120'
   br
   h2 Body
   textarea name='body' cols='120' rows='20'

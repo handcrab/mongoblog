@@ -1,7 +1,8 @@
 h1 index page!
 - @posts.each do |post|
   article
-    h1.title= post['title']
+    h1.title
+      a(href='/posts/#{post['permalink']}') = post['title']
     - if post['created_at']
       p.date= post['created_at']
     p.content= post['body']
