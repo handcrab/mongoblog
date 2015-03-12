@@ -23,7 +23,7 @@ class Post
 
   def self.create(post)
     # content_type :json
-    new_id = @collection.insert post
+    new_id = @collection.insert post.merge(created_at: Time.now)
     # id = object_id(id) if String === id
     @collection.find_one(_id: new_id)
   end
@@ -31,7 +31,17 @@ end
 
 get '/' do
   @title = 'Welcome to My Blog'
-  # @post = Post.create title: 'hello', body: 'Hello world', created_at: Time.now
   @posts = Post.all.limit 10
   slim :index
+end
+
+get '/posts/new' do
+  slim :new
+end
+
+post '/posts' do
+  @post = Post.create params
+  if @post
+    redirect '/'
+  end # TODO
 end

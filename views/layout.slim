@@ -3,5 +3,11 @@ html
   head
     title My blog | #{@title}
   body
-    h1= @title
-    == yield
+    nav
+      ul
+        li: a(href='/') Home
+        li: a(href='/posts/new') New post
+
+    .content
+      h1= @title
+      == yield
