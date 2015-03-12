@@ -12,6 +12,8 @@ configure do
   # posts_collection = mongo_db.collection('posts')
   set :mongo_db, MongoClient.new.db('blog')
   set :posts_collection, settings.mongo_db.collection('posts')
+  settings.posts_collection.create_index({ permalink: Mongo::ASCENDING },
+                                         unique: true)
 end
 
 # model
@@ -31,6 +33,8 @@ class Post
     # raise if @collection.find_one permalink: post['permalink']
     new_id = @collection.insert post.merge(created_at: Time.now)
     @collection.find_one(_id: new_id)
+  rescue Mongo::OperationFailure
+    nil
   end
 
   def self.find_by_permalink(permalink)
