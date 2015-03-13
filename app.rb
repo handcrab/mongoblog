@@ -1,7 +1,6 @@
 require 'sinatra'
 require 'slim'
 require 'mongo'
-require 'json/ext' # required for .to_json
 
 include Mongo
 
@@ -18,7 +17,7 @@ end
 
 # model
 class Post
-  @collection = Sinatra::Application.settings.mongo_db.collection('posts')
+  @collection = Sinatra::Application.settings.mongo_db.collection 'posts'
 
   class << self
     def all
@@ -28,7 +27,7 @@ class Post
     def create(post)
       post['permalink'] = permalink_or_value post['permalink'],
                                              valid_permalink_from(post['title'])
-      # raise if @collection.find_one permalink: post['permalink']
+      # raise if @collection.find_one permalink: post['permalink'] # unique?
       post['tags'] = prepare_tags post['tags']
       new_id = @collection.insert post.merge(created_at: Time.now)
       @collection.find_one(_id: new_id)
@@ -37,7 +36,6 @@ class Post
     end
 
     def find_by_permalink(permalink)
-      # id = object_id(id) if String === id
       @collection.find_one permalink: permalink
     end
 
@@ -64,7 +62,6 @@ class Post
 
     def increment_comment_likes(permalink, comment_ordinal)
       comment_id = "comments.#{comment_ordinal}.likes"
-      # @collection.update({ permalink: permalink }, '$set' => post)
       @collection.update({ permalink: permalink },
                          '$inc' => { comment_id => 1 })
     end
