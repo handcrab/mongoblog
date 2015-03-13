@@ -28,6 +28,7 @@ class Post
     post['permalink'] = permalink_or_value post['permalink'],
                                            valid_permalink_from(post['title'])
     # raise if @collection.find_one permalink: post['permalink']
+    post['tags'] = prepare_tags post['tags']
     new_id = @collection.insert post.merge(created_at: Time.now)
     @collection.find_one(_id: new_id)
   rescue Mongo::OperationFailure
@@ -40,6 +41,7 @@ class Post
   end
 
   def self.update(permalink, post)
+    post['tags'] = prepare_tags post['tags']
     # post['permalink'] = permalink_or_value post['permalink'], permalink
     @collection.update({ permalink: permalink }, '$set' => post)
   rescue Mongo::OperationFailure
@@ -58,6 +60,10 @@ class Post
   def self.permalink_or_value(permalink, value)
     return value if permalink.nil? || permalink.strip.empty?
     valid_permalink_from permalink
+  end
+
+  def self.prepare_tags(tag_str)
+    tag_str.split(',').map { |t| t.strip.downcase }.uniq
   end
 end
 
