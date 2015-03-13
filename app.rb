@@ -52,6 +52,10 @@ class Post
     @collection.remove permalink: permalink
   end
 
+  def self.find_by_tag(tag)
+    @collection.find(tags: tag).sort created_at: :desc
+  end
+
   # helpers
   def self.valid_permalink_from(value)
     value.strip.gsub(/\s+/, '_').downcase
@@ -113,4 +117,10 @@ end
 delete '/posts/:permalink' do
   @post = Post.delete_by_permalink params[:permalink]
   redirect '/'
+end
+
+get '/tags/:tag' do
+  @title =  "Posts by #{params[:tag]}"
+  @posts = Post.find_by_tag params[:tag] # URI.escape
+  slim :index
 end

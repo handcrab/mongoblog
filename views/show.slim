@@ -6,8 +6,11 @@ article.post(itemscope itemtype="http://schema.org/BlogPosting")
     time(pubdate itemprop="datePublished" datetime="#{@post['created_at']}" content="#{@post['created_at']}")
       = @post['created_at']
 
-    - if @post['tags']
-      p.tags(itemprop='keywords')= @post['tags'].join ', '
+    - if @post['tags'] && !@post['tags'].empty?
+      p.tags(itemprop='keywords')
+        - @post['tags'].each do |tag|
+          a(href="/tags/#{tag}")= tag
+          |  
 
     section itemprop="description"
       p.content= @post['body']
