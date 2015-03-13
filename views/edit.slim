@@ -1,0 +1,5 @@
+h1 Edit the post
+
+form action="/posts/#{@post['permalink']}" method='POST'
+  input type='hidden' name='_method' value='PATCH'
+  == slim :_form_fields

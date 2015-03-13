@@ -3,4 +3,5 @@ article.post
   p.date= @post['created_at']
   p.content= @post['body']
 
+a(href="/posts/#{@post['permalink']}/edit") Edit
 a(href='/') Back

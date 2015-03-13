@@ -1,0 +1,12 @@
+h2 Title
+input type='text' name='post[title]' size='120' required='true' value="#{@post['title']}"
+
+- unless @post['permalink']
+  h2 Permalink
+  input type='text' name='post[permalink]' size='120' value="#{@post['permalink']}"
+  br
+
+h2 Body
+textarea(name='post[body]' cols='120' rows='20')= @post['body']
+br
+input type='submit' value='Submit'

@@ -25,11 +25,8 @@ class Post
   end
 
   def self.create(post)
-    if post['permalink'].strip.empty?
-      post['permalink'] = post['title'].strip.gsub(/\s+/, '_')
-    end
-    # post['permalink'] ||= post['title'].strip.gsub(/\s+/, '_')
-    post['permalink'].downcase!
+    post['permalink'] = permalink_or_value post['permalink'],
+                                           valid_permalink_from(post['title'])
     # raise if @collection.find_one permalink: post['permalink']
     new_id = @collection.insert post.merge(created_at: Time.now)
     @collection.find_one(_id: new_id)
@@ -41,6 +38,23 @@ class Post
     # id = object_id(id) if String === id
     @collection.find_one permalink: permalink
   end
+
+  def self.update(permalink, post)
+    # post['permalink'] = permalink_or_value post['permalink'], permalink
+    @collection.update({ permalink: permalink }, '$set' => post)
+  rescue Mongo::OperationFailure
+    nil
+  end
+
+  # helpers
+  def self.valid_permalink_from(value)
+    value.strip.gsub(/\s+/, '_').downcase
+  end
+
+  def self.permalink_or_value(permalink, value)
+    return value if permalink.nil? || permalink.strip.empty?
+    valid_permalink_from permalink
+  end
 end
 
 get '/' do
@@ -50,19 +64,38 @@ get '/' do
 end
 
 get '/posts/new' do
+  @post = {}
   slim :new
 end
 
 post '/posts' do
-  @post = Post.create params
+  @post = Post.create params[:post]
   if @post
     redirect "/posts/#{@post['permalink']}"
   else
-    redirect '/posts/new'
+    params[:post].delete 'permalink' # reset permalink on error
+    @post = params[:post]
+    slim :new
   end
 end
 
 get '/posts/:permalink' do
   @post = Post.find_by_permalink params[:permalink]
   slim :show
+end
+
+get '/posts/:permalink/edit' do
+  @post = Post.find_by_permalink params[:permalink]
+  slim :edit
+end
+
+patch '/posts/:permalink' do
+  params[:post].delete 'permalink' # dont update permalink
+  @post = Post.update params[:permalink], params[:post]
+  if @post
+    redirect "/posts/#{params[:permalink]}"
+  else
+    @post = params[:post].merge permalink: params[:permalink]
+    slim :edit
+  end
 end
