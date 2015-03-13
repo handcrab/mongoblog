@@ -25,8 +25,17 @@ article.post(itemscope itemtype="http://schema.org/BlogPosting")
 - if @post['comments'] && !@post['comments'].empty?
   section.comments
     h1 Comments:
-    - @post['comments'].each do |comment|
+    - @post['comments'].each_with_index do |comment, i|
       article= comment['body']
+
+      | Likes: 
+      = comment['likes'] || 0
+      form action='/comments/like' method='POST'
+        input type="hidden" name="permalink" value="#{@post['permalink']}"
+        input type="hidden" name="_method" value="PATCH"
+        input type="hidden" name="comment[ordinal]" value="#{i}"
+        input type="submit" value="Like"
+      br
 
 .new-comment
   hr
@@ -35,7 +44,7 @@ article.post(itemscope itemtype="http://schema.org/BlogPosting")
     h2 New Comment
     textarea name="comment[body]" cols="60" rows="10" required='true'
     br
-    input type="submit" value="Comment"  title="Submit"
+    input type="submit" value="Comment"
 
 br
 a(href='/') Back

@@ -61,6 +61,12 @@ class Post
                        '$push' => { comments: comment })
   end
 
+  def self.increment_comment_likes(permalink, comment_ordinal)
+    comment_id = "comments.#{comment_ordinal}.likes"
+    # @collection.update({ permalink: permalink }, '$set' => post)
+    @collection.update({ permalink: permalink }, '$inc' => { comment_id => 1 })
+  end
+
   # helpers
   def self.valid_permalink_from(value)
     value.strip.gsub(/\s+/, '_').downcase
@@ -140,4 +146,9 @@ post '/comments' do
   Post.add_comment params[:permalink],
                    params[:comment].merge(created_at: Time.now)
   redirect post_path
+end
+
+patch '/comments/like' do
+  Post.increment_comment_likes params[:permalink], params[:comment][:ordinal]
+  redirect "/posts/#{params[:permalink]}"
 end
