@@ -46,6 +46,10 @@ class Post
     nil
   end
 
+  def self.delete_by_permalink(permalink)
+    @collection.remove permalink: permalink
+  end
+
   # helpers
   def self.valid_permalink_from(value)
     value.strip.gsub(/\s+/, '_').downcase
@@ -98,4 +102,9 @@ patch '/posts/:permalink' do
     @post = params[:post].merge permalink: params[:permalink]
     slim :edit
   end
+end
+
+delete '/posts/:permalink' do
+  @post = Post.delete_by_permalink params[:permalink]
+  redirect '/'
 end
