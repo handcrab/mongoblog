@@ -21,4 +21,21 @@ article.post(itemscope itemtype="http://schema.org/BlogPosting")
     input type="hidden" name="_method" value="DELETE"
     input type="submit" value="Delete"  title="Delete"
   br
+
+- if @post['comments'] && !@post['comments'].empty?
+  section.comments
+    h1 Comments:
+    - @post['comments'].each do |comment|
+      article= comment['body']
+
+.new-comment
+  hr
+  form action="/comments" method="POST"
+    input type="hidden" name="permalink" value="#{@post['permalink']}"
+    h2 New Comment
+    textarea name="comment[body]" cols="60" rows="10" required='true'
+    br
+    input type="submit" value="Comment"  title="Submit"
+
+br
 a(href='/') Back

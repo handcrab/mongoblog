@@ -56,6 +56,11 @@ class Post
     @collection.find(tags: tag).sort created_at: :desc
   end
 
+  def self.add_comment(permalink, comment)
+    @collection.update({ permalink: permalink },
+                       '$push' => { comments: comment })
+  end
+
   # helpers
   def self.valid_permalink_from(value)
     value.strip.gsub(/\s+/, '_').downcase
@@ -123,4 +128,16 @@ get '/tags/:tag' do
   @title =  "Posts by #{params[:tag]}"
   @posts = Post.find_by_tag params[:tag] # URI.escape
   slim :index
+end
+
+post '/comments' do
+  post = Post.find_by_permalink params[:permalink]
+  redirect '/' unless post # post not found
+
+  post_path = "/posts/#{params[:permalink]}"
+  redirect post_path if params[:comment][:body].strip.empty?
+
+  Post.add_comment params[:permalink],
+                   params[:comment].merge(created_at: Time.now)
+  redirect post_path
 end
