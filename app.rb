@@ -20,65 +20,68 @@ end
 class Post
   @collection = Sinatra::Application.settings.mongo_db.collection('posts')
 
-  def self.all
-    @collection.find.sort created_at: :desc # cursor
-  end
+  class << self
+    def all
+      @collection.find.sort created_at: :desc # cursor
+    end
 
-  def self.create(post)
-    post['permalink'] = permalink_or_value post['permalink'],
-                                           valid_permalink_from(post['title'])
-    # raise if @collection.find_one permalink: post['permalink']
-    post['tags'] = prepare_tags post['tags']
-    new_id = @collection.insert post.merge(created_at: Time.now)
-    @collection.find_one(_id: new_id)
-  rescue Mongo::OperationFailure
-    nil
-  end
+    def create(post)
+      post['permalink'] = permalink_or_value post['permalink'],
+                                             valid_permalink_from(post['title'])
+      # raise if @collection.find_one permalink: post['permalink']
+      post['tags'] = prepare_tags post['tags']
+      new_id = @collection.insert post.merge(created_at: Time.now)
+      @collection.find_one(_id: new_id)
+    rescue Mongo::OperationFailure
+      nil
+    end
 
-  def self.find_by_permalink(permalink)
-    # id = object_id(id) if String === id
-    @collection.find_one permalink: permalink
-  end
+    def find_by_permalink(permalink)
+      # id = object_id(id) if String === id
+      @collection.find_one permalink: permalink
+    end
 
-  def self.update(permalink, post)
-    post['tags'] = prepare_tags post['tags']
-    # post['permalink'] = permalink_or_value post['permalink'], permalink
-    @collection.update({ permalink: permalink }, '$set' => post)
-  rescue Mongo::OperationFailure
-    nil
-  end
+    def update(permalink, post)
+      post['tags'] = prepare_tags post['tags']
+      # post['permalink'] = permalink_or_value post['permalink'], permalink
+      @collection.update({ permalink: permalink }, '$set' => post)
+    rescue Mongo::OperationFailure
+      nil
+    end
 
-  def self.delete_by_permalink(permalink)
-    @collection.remove permalink: permalink
-  end
+    def delete_by_permalink(permalink)
+      @collection.remove permalink: permalink
+    end
 
-  def self.find_by_tag(tag)
-    @collection.find(tags: tag).sort created_at: :desc
-  end
+    def find_by_tag(tag)
+      @collection.find(tags: tag).sort created_at: :desc
+    end
 
-  def self.add_comment(permalink, comment)
-    @collection.update({ permalink: permalink },
-                       '$push' => { comments: comment })
-  end
+    def add_comment(permalink, comment)
+      @collection.update({ permalink: permalink },
+                         '$push' => { comments: comment })
+    end
 
-  def self.increment_comment_likes(permalink, comment_ordinal)
-    comment_id = "comments.#{comment_ordinal}.likes"
-    # @collection.update({ permalink: permalink }, '$set' => post)
-    @collection.update({ permalink: permalink }, '$inc' => { comment_id => 1 })
-  end
+    def increment_comment_likes(permalink, comment_ordinal)
+      comment_id = "comments.#{comment_ordinal}.likes"
+      # @collection.update({ permalink: permalink }, '$set' => post)
+      @collection.update({ permalink: permalink },
+                         '$inc' => { comment_id => 1 })
+    end
 
-  # helpers
-  def self.valid_permalink_from(value)
-    value.strip.gsub(/\s+/, '_').downcase
-  end
+    # helpers
+    def valid_permalink_from(value)
+      value.strip.gsub(/\s+/, '_').downcase
+    end
 
-  def self.permalink_or_value(permalink, value)
-    return value if permalink.nil? || permalink.strip.empty?
-    valid_permalink_from permalink
-  end
+    def permalink_or_value(permalink, value)
+      return value if permalink.nil? || permalink.strip.empty?
+      valid_permalink_from permalink
+    end
 
-  def self.prepare_tags(tag_str)
-    tag_str.split(',').map { |t| t.strip.downcase }.uniq
+    def prepare_tags(tag_str)
+      tag_str.split(',').map { |t| t.strip.downcase }.uniq
+    end
   end
 end
 

@@ -13,7 +13,7 @@ article.post(itemscope itemtype="http://schema.org/BlogPosting")
           |  
 
     section itemprop="description"
-      p.content= @post['body']
+      p.content== @post['body']
 
 .actions
   a(href="/posts/#{@post['permalink']}/edit") Edit
