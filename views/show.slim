@@ -1,7 +1,13 @@
-article.post
-  h1.title= @post['title']
-  p.date= @post['created_at']
-  p.content= @post['body']
+article.post(itemscope itemtype="http://schema.org/BlogPosting")
+  header
+    h1.title itemprop="name"
+      = @post['title']
+
+    time(pubdate itemprop="datePublished" datetime="#{@post['created_at']}" content="#{@post['created_at']}")
+      = @post['created_at']
+
+    section itemprop="description"
+      p.content= @post['body']
 
 .actions
   a(href="/posts/#{@post['permalink']}/edit") Edit

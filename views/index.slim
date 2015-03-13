@@ -4,6 +4,5 @@ h1 index page!
     h1.title
       a(href='/posts/#{post['permalink']}') = post['title']
     - if post['created_at']
-      p.date= post['created_at']
-    p.content= post['body']
-    br
+      time.date= post['created_at']
+    hr
